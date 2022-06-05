@@ -21,7 +21,7 @@ const scene = new THREE.Scene();
  * Test mesh
  */
 // Geometry
-let num = 1000;
+let num = 1500;
 let positions = new Float32Array(num * 3);
 let angle = new Float32Array(num);
 let life = new Float32Array(num);
@@ -47,6 +47,7 @@ geometry.setAttribute('offset', new THREE.Float32BufferAttribute(offset, 1));
 const material = new THREE.ShaderMaterial({
     uniforms: {
         uTime: { value: 0 },
+        uMouse: { value: new THREE.Vector2(0, 0) },
     },
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
@@ -60,6 +61,16 @@ const material = new THREE.ShaderMaterial({
 const mesh = new THREE.Points(geometry, material);
 scene.add(mesh);
 
+let clearPlane = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry(7, 3),
+    new THREE.MeshBasicMaterial({
+        color: 0x0000ff,
+        transparent: true,
+        opacity: 0.01
+    })
+);
+
+scene.add(clearPlane);
 /**
  * Sizes
  */
@@ -82,6 +93,34 @@ window.addEventListener('resize', () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+function onPointerMove(event) {
+
+    // calculate pointer position in normalized device coordinates
+    // (-1 to +1) for both components
+
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+    // update the picking ray with the camera and pointer position
+    raycaster.setFromCamera(pointer, camera);
+
+    // calculate objects intersecting the picking ray
+    const intersects = raycaster.intersectObjects([clearPlane]);
+
+    if (intersects[0]) {
+        let p = intersects[0].point;
+        material.uniforms.uMouse.value.x = p.x;
+        material.uniforms.uMouse.value.y = p.y;
+        // console.log(p);
+    }
+
+}
+
+window.addEventListener('pointermove', onPointerMove);
+
 /**
  * Camera
  */
@@ -101,8 +140,11 @@ controls.enableDamping = true;
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    preserveDrawingBuffer: true,
+    alpha: true,
 });
+renderer.autoClear = false;
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
