@@ -1,4 +1,5 @@
 varying vec2 vUv;
+varying float vAlpha;
 attribute float angle;
 attribute float life;
 attribute float offset;
@@ -12,6 +13,9 @@ void main()
     
     float current=mod(offset+uTime,life);
     float percent=current/life;
+    
+    vAlpha=smoothstep(0.,.05,percent);
+    vAlpha-=smoothstep(.85,1.,percent);
     
     newpos.x+=cos(angle)*current;
     newpos.y+=sin(angle)*current;
