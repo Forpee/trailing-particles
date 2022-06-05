@@ -21,9 +21,11 @@ const scene = new THREE.Scene();
  * Test mesh
  */
 // Geometry
-let num = 100;
+let num = 1000;
 let positions = new Float32Array(num * 3);
 let angle = new Float32Array(num);
+let life = new Float32Array(num);
+let offset = new Float32Array(num);
 
 for (let i = 0; i < num; i++) {
     positions.set([Math.random() * 0.1,
@@ -31,12 +33,16 @@ for (let i = 0; i < num; i++) {
     Math.random() * 0.1], i * 3);
 
     angle.set([Math.random() * Math.PI * 2], i);
+    life.set([4 + Math.random() * 10], i);
+    offset.set([Math.random() * 1000], i);
 }
 
 const geometry = new THREE.BufferGeometry();
 
 geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 geometry.setAttribute('angle', new THREE.Float32BufferAttribute(angle, 1));
+geometry.setAttribute('life', new THREE.Float32BufferAttribute(life, 1));
+geometry.setAttribute('offset', new THREE.Float32BufferAttribute(offset, 1));
 // Material
 const material = new THREE.ShaderMaterial({
     uniforms: {
